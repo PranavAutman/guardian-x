@@ -13,7 +13,7 @@ class GuardianAIEngine {
 
         this.conversationHistory = [];
         // IMPORTANT: Replace with your actual Google Cloud API key that has access to Gemini
-        this.apiKey = "AIzaSyDh6VCywpUEVDYzqfrUn9RUmFHrpU7p7N0"; // Replace this with your API key
+        this.apiKey = "AIzaSyAOVcBeATt8tJ0Kg_JTVHCT2mDX-ZEu63o"; // Replace this with your API key
 
         this.knowledgeBase = {
             capabilities: {
