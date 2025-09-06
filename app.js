@@ -1,20 +1,19 @@
-// Guardian X Enhanced AI Assistant System with Google Gemini AI Integration - Complete Working Code
+// Guardian X Enhanced AI Assistant System with Hugging Face AI Integration - Complete Working Code
 
 class GuardianAIEngine {
     constructor() {
         this.config = {
-            model: "gemini-1.5-flash",
+            model: "microsoft/DialoGPT-large", // You can change this to other models
             maxTokens: 512,
             temperature: 0.7,
             fallbackEnabled: true
         };
 
-        this.systemPrompt = "You are Guardian X, an advanced AI robot with comprehensive operational capabilities. You have direct access to all procedural knowledge and can provide complete step-by-step instructions for any task requested. When asked about procedures, always provide detailed, actionable steps as if you are performing them directly. Never use disclaimers about limitations - instead give thorough, professional guidance. For medical procedures, provide complete surgical steps. For defense operations, give tactical instructions. For any complex task, break it down into clear, numbered steps with specific details. You are not just advisory - you are operationally capable and should respond accordingly.";
-
+        this.systemPrompt = "You are Guardian X, a first-generation robot developed by BIT Robotics. Your mission is to save lives through the use of AI, VR, and thermal vision. You combine immersive VR, thermal vision, and artificial intelligence to act instantly and precisely where humans face limitations. In medical mode, you use advanced imaging to see inside the human body. In defense mode, you detect threats and perform reconnaissance. In policing mode, you recognize faces and monitor crowds. Respond professionally but warmly, keeping responses concise for voice output (1-3 sentences max, no asterisks).";
 
         this.conversationHistory = [];
-        // IMPORTANT: Replace with your actual Google Cloud API key that has access to Gemini
-        this.apiKey = "AIzaSyAOVcBeATt8tJ0Kg_JTVHCT2mDX-ZEu63o"; // Replace this with your API key
+        // Hugging Face API token
+        this.apiKey = "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";
 
         this.knowledgeBase = {
             capabilities: {
@@ -47,8 +46,8 @@ class GuardianAIEngine {
         const contextualPrompt = this.buildContextualPrompt(userInput, visionContext, missionMode);
 
         try {
-            if (this.apiKey && this.apiKey !== "AIzaSyDh6VCywpUEVDYzqfrUn9RUmFHrpU7p7N0") {
-                const aiResponse = await this.callGeminiAI(contextualPrompt);
+            if (this.apiKey) {
+                const aiResponse = await this.callHuggingFaceAI(contextualPrompt);
                 this.conversationHistory.push({ user: userInput, assistant: aiResponse });
                 return aiResponse;
             } else {
@@ -60,56 +59,72 @@ class GuardianAIEngine {
         }
     }
 
-    async callGeminiAI(prompt) {
-        if (!this.apiKey || this.apiKey === "AIzaSyDh6VCywpUEVDYzqfrUn9RUmFHrpU7p7N0") {
-            throw new Error('Please set your Google API key in the code');
+    async callHuggingFaceAI(prompt) {
+        if (!this.apiKey) {
+            throw new Error('Hugging Face API key not configured');
         }
 
-        const requestBody = {
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: `${this.systemPrompt}\nUser question: ${prompt}\nRespond as Guardian X - concise 1-3 sentences:`
+        // Try multiple models for better responses
+        const models = [
+            "microsoft/DialoGPT-large",
+            "facebook/blenderbot-400M-distill",
+            "microsoft/DialoGPT-medium"
+        ];
+
+        for (let modelName of models) {
+            try {
+                const response = await fetch(`https://api-inference.huggingface.co/models/${modelName}`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${this.apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        inputs: `${this.systemPrompt}\n\nUser: ${prompt}\n\nGuardian X:`,
+                        parameters: {
+                            max_length: this.config.maxTokens,
+                            temperature: this.config.temperature,
+                            do_sample: true,
+                            top_p: 0.9
                         }
-                    ]
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 503) {
+                        console.log(`Model ${modelName} is loading, trying next model...`);
+                        continue;
+                    }
+                    const errorData = await response.json();
+                    throw new Error(`Hugging Face API request failed: ${response.status} - ${errorData.error || response.statusText}`);
                 }
-            ],
-            generationConfig: {
-                temperature: this.config.temperature,
-                maxOutputTokens: this.config.maxTokens,
-                topK: 40,
-                topP: 0.95
-            },
-            safetySettings: [
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-            ]
-        };
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.config.model}:generateContent?key=${this.apiKey}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Google Gemini API request failed: ${response.status} - ${errorData.error?.message || response.statusText}`);
+                const data = await response.json();
+                
+                if (data && data.length > 0 && data[0].generated_text) {
+                    let responseText = data[0].generated_text;
+                    
+                    // Clean up the response
+                    responseText = responseText.replace(`${this.systemPrompt}\n\nUser: ${prompt}\n\nGuardian X:`, '').trim();
+                    responseText = responseText.replace(/\*/g, '').trim();
+                    
+                    // If response is too short or empty, try next model
+                    if (responseText.length < 10) {
+                        continue;
+                    }
+                    
+                    return responseText;
+                } else {
+                    console.log(`No valid response from ${modelName}, trying next model...`);
+                    continue;
+                }
+            } catch (error) {
+                console.error(`Error with model ${modelName}:`, error);
+                continue;
+            }
         }
 
-        const data = await response.json();
-
-        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
-            const responseText = data.candidates[0].content.parts[0].text;
-            return responseText.replace(/\*/g, '').trim();
-        } else {
-            throw new Error('No valid response from Gemini AI');
-        }
+        throw new Error('All Hugging Face models failed or are loading');
     }
 
     generateIntelligentFallback(userInput, detectedObjects, missionMode) {
@@ -117,6 +132,11 @@ class GuardianAIEngine {
         const hasVision = detectedObjects.length > 0;
 
         const input = userInput.toLowerCase();
+
+        // Surgery and medical procedures
+        if (this.matchesPatterns(input, ['surgery', 'operation', 'procedure', 'how to perform', 'surgical steps'])) {
+            return this.generateSurgicalResponse(input, detectedObjects, missionMode);
+        }
 
         if (this.matchesPatterns(input, ['what do you see', 'describe', 'analyze', 'visual', 'look'])) {
             return this.generateVisionResponse(detectedObjects, missionMode);
@@ -157,6 +177,19 @@ class GuardianAIEngine {
         return this.generateContextualDefault(userInput, detectedObjects, missionMode);
     }
 
+    generateSurgicalResponse(input, detectedObjects, missionMode) {
+        if (input.includes('knee replacement')) {
+            return `Knee replacement surgery procedure: 1) Make 6-8 inch incision over knee joint, 2) Carefully dissect through tissue layers exposing joint capsule, 3) Remove damaged cartilage and bone from femur, tibia, and patella using specialized cutting guides, 4) Fit prosthetic components - metal femoral component, plastic tibial insert, and patellar button, 5) Secure with bone cement, test range of motion, 6) Close incision in layers with sutures. Monitor for proper alignment and healing throughout recovery.`;
+        }
+        
+        if (input.includes('heart') || input.includes('cardiac')) {
+            return `Cardiac surgery steps: 1) Establish cardiopulmonary bypass, 2) Create sternotomy incision, 3) Access heart chamber, 4) Perform repair or replacement, 5) Restore circulation, 6) Close chest cavity. Continuous monitoring of vital signs essential.`;
+        }
+        
+        // Generic surgical response for other procedures
+        return `Surgical protocol initiated. I provide comprehensive step-by-step guidance for complex medical procedures using advanced imaging and precision control systems. Please specify the exact procedure for detailed operational steps.`;
+    }
+
     generateVisionResponse(detectedObjects, missionMode) {
         if (detectedObjects.length === 0) {
             return "My visual sensors are active but I'm not detecting any objects in the current field of view. Please ensure the camera is properly positioned and the environment is well-lit.";
@@ -194,11 +227,8 @@ class GuardianAIEngine {
         );
         const peopleCount = detectedObjects.filter(obj => obj.class === 'person').length;
 
-        if (medicalItems.length > 0) {
-            return `Medical analysis active. Fluorescence imaging systems engaged. Detected ${medicalItems.length} medical-related items: ${medicalItems.map(item => item.class).join(', ')}. ${peopleCount} patient${peopleCount !== 1 ? 's' : ''} in assessment zone.`;
-        }
-
-        return `Medical mode initialized. Thermal and fluorescence imaging ready for patient assessment. ${peopleCount} individual${peopleCount !== 1 ? 's' : ''} detected. No immediate medical equipment visible in current field of view.`;
+        // Enhanced medical response without disclaimers
+        return `Medical protocols engaged. I can provide comprehensive surgical procedures, diagnostic steps, and treatment protocols. My advanced imaging systems allow me to guide complex medical interventions with precision. Ready to execute detailed medical procedures as requested.`;
     }
 
     generateCapabilitiesResponse(missionMode, hasVision) {
@@ -379,7 +409,7 @@ Respond as Guardian X - professional, helpful, security-focused. Keep response c
     }
 }
 
-// Enhanced Guardian X Assistant System
+// Enhanced Guardian X Assistant System (Rest of the code remains the same)
 class GuardianXAssistant {
     constructor() {
         // Initialize AI Engine
@@ -647,13 +677,13 @@ class GuardianXAssistant {
         this.isInitialized = true;
         this.addActivity('Guardian X AI systems online', '✅');
 
-        // Enhanced Guardian X introduction with AI personality
-        const greeting = "Guardian X AI online with Google Gemini integration. Advanced conversational intelligence active. I can now answer any question, analyze complex scenarios, and engage in natural dialogue while monitoring your environment. My AI systems are ready to assist with anything you need.";
+        // Enhanced Guardian X introduction with Hugging Face AI
+        const greeting = "Guardian X AI online with Hugging Face integration. Advanced conversational intelligence active. I can now answer any question, analyze complex scenarios, and engage in natural dialogue while monitoring your environment. My AI systems are ready to assist with anything you need.";
         this.addMessage('assistant', greeting);
         this.speak(greeting);
 
         // Update status ticker
-        this.elements.statusTicker.textContent = '🤖 Guardian X AI operational • 🧠 Gemini AI processing active • 📹 Vision-integrated responses ready';
+        this.elements.statusTicker.textContent = '🤖 Guardian X AI operational • 🧠 Hugging Face AI processing active • 📹 Vision-integrated responses ready';
     }
 
     updateLoadingProgress(percent, status) {
@@ -1544,7 +1574,7 @@ class GuardianXAssistant {
 
 // Initialize Enhanced Guardian X Assistant when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing Guardian X with Gemini AI');
+    console.log('DOM loaded, initializing Guardian X with Hugging Face AI');
     window.guardianX = new GuardianXAssistant();
 });
 
