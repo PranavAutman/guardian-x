@@ -744,7 +744,7 @@ select.form-control {
     /* Override with design system colors for dark theme */
     --primary-bg: var(--color-background);
     --secondary-bg: var(--color-surface);
-    --panel-bg: var(--color-surface);
+    --panel-bg: #0a0a0a;
     --accent-cyan: var(--color-primary);
     --accent-green: var(--color-success);
     --accent-orange: var(--color-warning);
