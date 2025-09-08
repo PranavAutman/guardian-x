@@ -26,11 +26,19 @@
                 <span class="logo-subtitle">AI-Powered Interactive Assistant</span>
             </div>
         </div>
-        <div id="apiKeySection" style="margin:10px; padding:10px; background:#222; color:#fff;">
-          <label for="apiKeyInput">Enter API Key:</label><br>
-          <input type="password" id="apiKeyInput" placeholder="hf_xxx..." style="width:300px; padding:5px; margin-top:5px;" />
-          <button id="saveApiKeyBtn" style="padding:5px 10px; margin-left:10px;">Save API Key</button>
-          <div id="apiKeyStatus" style="margin-top:5px; font-size:14px;"></div>
+        <div id="apiKeySection" class="config-section">
+            <div class="config-header">
+                <h3>🔑 API Configuration</h3>
+            </div>
+            <div class="config-content">
+                <label for="apiKeyInput">Google Gemini API Key:</label>
+                <div class="api-key-input-group">
+                    <input type="password" id="apiKeyInput" placeholder="Enter your Google API key (AIzaSy...)" />
+                    <button id="saveApiKeyBtn">Save Key</button>
+                    <button id="testApiKeyBtn">Test</button>
+                </div>
+                <div id="apiKeyStatus" class="status-message"></div>
+            </div>
         </div>
         <div class="header-center">
             <div class="system-status">
