@@ -26,7 +26,12 @@
                 <span class="logo-subtitle">AI-Powered Interactive Assistant</span>
             </div>
         </div>
-        
+        <div id="apiKeySection" style="margin:10px; padding:10px; background:#222; color:#fff;">
+          <label for="apiKeyInput">Enter Hugging Face API Key:</label><br>
+          <input type="password" id="apiKeyInput" placeholder="hf_xxx..." style="width:300px; padding:5px; margin-top:5px;" />
+          <button id="saveApiKeyBtn" style="padding:5px 10px; margin-left:10px;">Save API Key</button>
+          <div id="apiKeyStatus" style="margin-top:5px; font-size:14px;"></div>
+        </div>
         <div class="header-center">
             <div class="system-status">
                 <div class="status-indicator" id="systemStatus"></div>
