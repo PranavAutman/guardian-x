@@ -1170,24 +1170,33 @@ class GuardianXAssistant {
 
         this.voiceRecognition.onresult = (event) => {
             let finalTranscript = '';
-
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
+                    finalTranscript += event.results[i][0].transcript.toLowerCase();
                 }
             }
-
             if (finalTranscript.trim()) {
-                console.log('Voice command received:', finalTranscript);
-                this.processVoiceCommand(finalTranscript.toLowerCase().trim());
+                const wakeWords = ['hey guardian', 'guardian', 'guard', 'robot'];
+                const wakeDetected = wakeWords.some(word => finalTranscript.includes(word));
+                if (wakeDetected) {
+                    let command = finalTranscript;
+                    wakeWords.forEach(word => {
+                        command = command.replace(word, '').trim();
+                    });
+                    if (command.length === 0) {
+                        this.speak('Yes? How can I assist?');
+                        return;
+                    }
+                    this.processVoiceCommand(command);
+                }
             }
         };
-
+        
         this.voiceRecognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             this.addActivity('Voice recognition error', '⚠️');
         };
-
+        
         this.voiceRecognition.onend = () => {
             console.log('Voice recognition ended, isListening:', this.isListening);
             if (this.isListening) {
@@ -1200,7 +1209,7 @@ class GuardianXAssistant {
                 }, 100);
             }
         };
-
+        
         this.elements.voiceHealth.textContent = 'Ready';
         this.elements.voiceHealth.className = 'health-status loading';
     }
