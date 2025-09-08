@@ -1,4 +1,4 @@
-// Guardian X Enhanced AI Assistant System with Google Gemini AI Integration - Complete Working Code
+// Guardian X Enhanced AI Assistant System with Dynamic Google Gemini API Integration - Complete Working Code
 
 class GuardianAIEngine {
     constructor() {
@@ -11,10 +11,13 @@ class GuardianAIEngine {
 
         this.systemPrompt = "You are Guardian X, an advanced AI robot with comprehensive operational capabilities. You have direct access to all procedural knowledge and can provide complete step-by-step instructions for any task requested. When asked about procedures, always provide detailed, actionable steps as if you are performing them directly. Never use disclaimers about limitations - instead give thorough, professional guidance. For medical procedures, provide complete surgical steps. For defense operations, give tactical instructions. For any complex task, break it down into clear, numbered steps with specific details. You are not just advisory - you are operationally capable and should respond accordingly.";
 
-
         this.conversationHistory = [];
-        // IMPORTANT: Replace with your actual Google Cloud API key that has access to Gemini
-        this.apiKey = "AIzaSyDh6VCywpUEVDYzqfrUn9RUmFHrpU7p7N0"; // Replace this with your API key
+        
+        // Initialize API key as empty - will be loaded dynamically
+        this.apiKey = "";
+        
+        // Load saved API key if available
+        this.loadSavedApiKey();
 
         this.knowledgeBase = {
             capabilities: {
@@ -42,12 +45,20 @@ class GuardianAIEngine {
         };
     }
 
+    loadSavedApiKey() {
+        const savedKey = localStorage.getItem('guardianX_apiKey');
+        if (savedKey) {
+            this.apiKey = savedKey;
+            console.log('Loaded saved API key');
+        }
+    }
+
     async generateResponse(userInput, detectedObjects, missionMode) {
         const visionContext = this.formatVisionContext(detectedObjects);
         const contextualPrompt = this.buildContextualPrompt(userInput, visionContext, missionMode);
 
         try {
-            if (this.apiKey && this.apiKey !== "AIzaSyDh6VCywpUEVDYzqfrUn9RUmFHrpU7p7N0") {
+            if (this.apiKey && this.apiKey.trim() !== "") {
                 const aiResponse = await this.callGeminiAI(contextualPrompt);
                 this.conversationHistory.push({ user: userInput, assistant: aiResponse });
                 return aiResponse;
@@ -61,8 +72,8 @@ class GuardianAIEngine {
     }
 
     async callGeminiAI(prompt) {
-        if (!this.apiKey || this.apiKey === "AIzaSyDh6VCywpUEVDYzqfrUn9RUmFHrpU7p7N0") {
-            throw new Error('Please set your Google API key in the code');
+        if (!this.apiKey || this.apiKey.trim() === "") {
+            throw new Error('Google API key not configured. Please enter your API key in the settings.');
         }
 
         const requestBody = {
@@ -376,6 +387,10 @@ Respond as Guardian X - professional, helpful, security-focused. Keep response c
 
     setApiKey(apiKey) {
         this.apiKey = apiKey;
+        // Save to localStorage whenever API key is set
+        if (apiKey && apiKey.trim() !== "") {
+            localStorage.setItem('guardianX_apiKey', apiKey);
+        }
     }
 }
 
@@ -534,7 +549,13 @@ class GuardianXAssistant {
             statusTicker: document.getElementById('statusTicker'),
 
             // Mission mode
-            aiMode: document.getElementById('aiMode')
+            aiMode: document.getElementById('aiMode'),
+
+            // API Key elements
+            apiKeyInput: document.getElementById('apiKeyInput'),
+            saveApiKeyBtn: document.getElementById('saveApiKeyBtn'),
+            testApiKeyBtn: document.getElementById('testApiKeyBtn'),
+            apiKeyStatus: document.getElementById('apiKeyStatus')
         };
     }
 
@@ -593,6 +614,88 @@ class GuardianXAssistant {
             console.log('Emergency button clicked, current state:', this.isEmergencyActive);
             this.toggleEmergencyStop();
         });
+
+        // API Key management
+        this.elements.saveApiKeyBtn?.addEventListener('click', () => this.saveApiKey());
+        this.elements.testApiKeyBtn?.addEventListener('click', () => this.testApiKey());
+        
+        // Load saved API key on startup
+        this.loadApiKeyOnStartup();
+    }
+
+    loadApiKeyOnStartup() {
+        const savedKey = localStorage.getItem('guardianX_apiKey');
+        if (savedKey && this.elements.apiKeyInput) {
+            this.elements.apiKeyInput.value = savedKey;
+            this.updateApiKeyStatus('API key loaded from storage', 'success');
+        } else if (this.elements.apiKeyStatus) {
+            this.updateApiKeyStatus('No API key configured. Please enter your Google Gemini API key.', 'warning');
+        }
+    }
+
+    saveApiKey() {
+        if (!this.elements.apiKeyInput) {
+            console.warn('API key input element not found');
+            return;
+        }
+
+        const key = this.elements.apiKeyInput.value.trim();
+        
+        if (!key) {
+            this.updateApiKeyStatus('Please enter an API key', 'error');
+            return;
+        }
+        
+        if (!key.startsWith('AIzaSy')) {
+            this.updateApiKeyStatus('Invalid API key format. Google API keys start with "AIzaSy"', 'error');
+            return;
+        }
+        
+        // Save to localStorage and update the AI engine
+        this.aiEngine.setApiKey(key);
+        
+        this.updateApiKeyStatus('API key saved successfully!', 'success');
+        this.addActivity('API key updated', '🔑');
+    }
+
+    async testApiKey() {
+        if (!this.elements.apiKeyInput) {
+            console.warn('API key input element not found');
+            return;
+        }
+
+        const key = this.elements.apiKeyInput.value.trim();
+        
+        if (!key) {
+            this.updateApiKeyStatus('Please enter an API key first', 'error');
+            return;
+        }
+        
+        this.updateApiKeyStatus('Testing API key...', 'warning');
+        
+        try {
+            // Temporarily set the key for testing
+            const originalKey = this.aiEngine.apiKey;
+            this.aiEngine.setApiKey(key);
+            
+            // Test with a simple query
+            const response = await this.aiEngine.callGeminiAI('Hello, respond with "API key working"');
+            
+            if (response) {
+                this.updateApiKeyStatus('API key is working! ✅', 'success');
+                this.addActivity('API key verified successfully', '✅');
+            }
+        } catch (error) {
+            this.updateApiKeyStatus(`API key test failed: ${error.message}`, 'error');
+            console.error('API key test error:', error);
+        }
+    }
+
+    updateApiKeyStatus(message, type) {
+        if (this.elements.apiKeyStatus) {
+            this.elements.apiKeyStatus.textContent = message;
+            this.elements.apiKeyStatus.className = `status-message status-${type}`;
+        }
     }
 
     async initializeSystem() {
@@ -647,13 +750,20 @@ class GuardianXAssistant {
         this.isInitialized = true;
         this.addActivity('Guardian X AI systems online', '✅');
 
-        // Enhanced Guardian X introduction with AI personality
-        const greeting = "Guardian X AI online with Google Gemini integration. Advanced conversational intelligence active. I can now answer any question, analyze complex scenarios, and engage in natural dialogue while monitoring your environment. My AI systems are ready to assist with anything you need.";
+        // Check if API key is configured
+        const hasApiKey = this.aiEngine.apiKey && this.aiEngine.apiKey.trim() !== "";
+        
+        let greeting;
+        if (hasApiKey) {
+            greeting = "Guardian X AI online with Google Gemini integration. Advanced conversational intelligence active. I can now answer any question, analyze complex scenarios, and engage in natural dialogue while monitoring your environment. My AI systems are ready to assist with anything you need.";
+            this.elements.statusTicker.textContent = '🤖 Guardian X AI operational • 🧠 Gemini AI processing active • 📹 Vision-integrated responses ready';
+        } else {
+            greeting = "Guardian X systems online. Please configure your Google Gemini API key to enable advanced conversational AI capabilities. Object detection and basic functions are operational.";
+            this.elements.statusTicker.textContent = '🤖 Guardian X operational • ⚠️ API key required for AI features • 📹 Basic vision functions active';
+        }
+        
         this.addMessage('assistant', greeting);
         this.speak(greeting);
-
-        // Update status ticker
-        this.elements.statusTicker.textContent = '🤖 Guardian X AI operational • 🧠 Gemini AI processing active • 📹 Vision-integrated responses ready';
     }
 
     updateLoadingProgress(percent, status) {
@@ -1544,7 +1654,7 @@ class GuardianXAssistant {
 
 // Initialize Enhanced Guardian X Assistant when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing Guardian X with Gemini AI');
+    console.log('DOM loaded, initializing Guardian X with dynamic Gemini AI');
     window.guardianX = new GuardianXAssistant();
 });
 
