@@ -1153,7 +1153,7 @@ class GuardianXAssistant {
         this.voiceRecognition = new SpeechRecognition();
 
         this.voiceRecognition.continuous = true;
-        this.voiceRecognition.interimResults = true;
+        this.voiceRecognition.interimResults = false;
         this.voiceRecognition.lang = 'en-US';
 
         this.voiceRecognition.onstart = () => {
