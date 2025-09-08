@@ -4,8 +4,8 @@ class GuardianAIEngine {
     constructor() {
         this.config = {
             model: "gemini-2.5-flash",
-            maxTokens: 1048,
-            temperature: 0.9,
+            maxTokens: 512,
+            temperature: 0.7,
             fallbackEnabled: true
         };
 
