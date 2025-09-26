@@ -3,343 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guardian X - AI Vision Assistant</title>
+    <title>Kunal Intelligence - Advanced AI Investment Platform</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- TensorFlow.js for Object Detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
-    
-    <!-- Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <!-- Background particles -->
-    <div class="particles-bg"></div>
-    
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <div class="logo">
-                <div class="logo-icon">🤖</div>
-                <h1>Guardian X</h1>
-                <span class="logo-subtitle">AI-Powered Interactive Assistant</span>
-            </div>
-        </div>
-        <div id="apiKeySection" class="config-section">
-            <div class="config-header">
-                <h3>🔑 API Configuration</h3>
-            </div>
-            <div class="config-content">
-                <label for="apiKeyInput">Google Gemini API Key:</label>
-                <div class="api-key-input-group">
-                    <input type="password" id="apiKeyInput" placeholder="Enter your Google API key (AIzaSy...)" />
-                    <button id="saveApiKeyBtn">Save Key</button>
-                    <button id="testApiKeyBtn">Test</button>
-                </div>
-                <div id="apiKeyStatus" class="status-message"></div>
-            </div>
-        </div>
-        <div class="header-center">
-            <div class="system-status">
-                <div class="status-indicator" id="systemStatus"></div>
-                <span class="status-text" id="statusText">INITIALIZING AI</span>
-            </div>
-            <div class="mission-selector">
-                <button class="mission-btn" data-mode="MEDICAL">🏥 MEDICAL</button>
-                <button class="mission-btn active" data-mode="POLICING">👮 POLICING</button>
-                <button class="mission-btn" data-mode="DEFENSE">🛡️ DEFENSE</button>
-            </div>
-        </div>
-        
-        <div class="header-right">
-            <div class="current-time" id="currentTime"></div>
-            <button class="emergency-btn" id="emergencyBtn">🛑 EMERGENCY STOP</button>
-        </div>
-    </header>
-
     <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <h2>Guardian X AI Initializing</h2>
-            <div class="loading-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="loading-status" id="loadingStatus">Loading AI Engine...</div>
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-animation">
+            <div class="neon-circle"></div>
+            <h2 class="loading-text">Kunal Intelligence</h2>
+            <p class="loading-subtitle">Connecting to Groww API...</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loading-progress"></div>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard -->
-    <main class="dashboard" id="dashboard" style="display: none;">
-        <!-- Left Column - AI-Powered Assistant -->
-        <section class="panel ai-assistant-panel">
-            <div class="panel-header">
-                <h2>🧠 Guardian X AI Assistant</h2>
-                <div class="ai-status">
-                    <span class="ai-mode" id="aiMode">POLICING MODE</span>
-                    <div class="ai-indicator">🤖 AI READY</div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="brand-title">
+                    <span class="brand-kunal">Kunal</span>
+                    <span class="brand-intelligence">Intelligence</span>
+                </h1>
+                <div class="connection-status" id="api-status">
+                    <div class="status-dot offline"></div>
+                    <span>API Connecting...</span>
                 </div>
             </div>
-            
-            <!-- Enhanced Voice Controls -->
-            <div class="voice-controls">
-                <div class="voice-input">
-                    <button class="btn btn--primary voice-btn" id="voiceToggle">
-                        <span class="voice-icon">🎤</span>
-                        <span class="voice-text">Start AI Listening</span>
-                    </button>
-                    <div class="voice-indicator" id="voiceIndicator">
-                        <div class="listening-pulse" id="listeningPulse"></div>
-                        <span id="voiceStatus">Click to activate AI voice commands</span>
-                    </div>
-                </div>
-                
-                <div class="ai-capabilities">
-                    <h4>🧠 AI Capabilities</h4>
-                    <div class="capability-tags">
-                        <span class="capability-tag">Natural Conversation</span>
-                        <span class="capability-tag">Vision Analysis</span>
-                        <span class="capability-tag">Contextual Responses</span>
-                        <span class="capability-tag">Any Question</span>
-                    </div>
-                </div>
-                
-                <div class="voice-output">
-                    <h4>Voice Response Settings</h4>
-                    <div class="voice-settings">
-                        <div class="setting-group">
-                            <label for="voiceSelect">AI Voice:</label>
-                            <select class="form-control" id="voiceSelect">
-                                <option value="">Loading voices...</option>
-                            </select>
+            <div class="nav-menu">
+                <button class="nav-btn active" data-section="dashboard">Dashboard</button>
+                <button class="nav-btn" data-section="profile">Profile</button>
+                <button class="nav-btn" data-section="explorer">Stock Explorer</button>
+                <button class="nav-btn" data-section="analysis">Analysis</button>
+                <button class="nav-btn" data-section="portfolio">Portfolio</button>
+                <button class="nav-btn" data-section="trading">Live Trading</button>
+            </div>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Real-Time <span class="gradient-text">Indian Market</span> Intelligence
+                    </h1>
+                    <p class="hero-subtitle">AI-powered investment decisions with live Groww API integration and guaranteed returns analysis</p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="portfolio-value">₹0</div>
+                            <div class="stat-label">Portfolio Value</div>
                         </div>
-                        <div class="setting-group">
-                            <label for="rateSlider">Speed:</label>
-                            <input type="range" min="0.5" max="2" step="0.1" value="0.9" id="rateSlider">
-                            <span id="rateValue">0.9x</span>
+                        <div class="stat-item">
+                            <div class="stat-number" id="daily-pnl">+0%</div>
+                            <div class="stat-label">Today's P&L</div>
                         </div>
-                        <div class="setting-group">
-                            <label for="volumeSlider">Volume:</label>
-                            <input type="range" min="0" max="1" step="0.1" value="0.8" id="volumeSlider">
-                            <span id="volumeValue">80%</span>
+                        <div class="stat-item">
+                            <div class="stat-number" id="win-rate">0%</div>
+                            <div class="stat-label">AI Win Rate</div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- AI Conversation Display -->
-            <div class="conversation">
-                <div class="conversation-header">
-                    <h4>🗨️ Live AI Conversation</h4>
-                    <button class="btn btn--sm" id="clearConversation">Clear</button>
-                </div>
-                <div class="conversation-log" id="conversationLog">
-                    <div class="message assistant">
-                        <div class="message-avatar">🤖</div>
-                        <div class="message-content">
-                            <div class="message-text">Guardian X AI online. I can now answer any question, engage in natural conversation, and provide intelligent analysis based on what I see. How may I assist you?</div>
-                            <div class="message-time">AI Ready</div>
+
+            <!-- Live Market Overview -->
+            <div class="market-section">
+                <div class="section-header">
+                    <h3 class="section-title">Live Market Data</h3>
+                    <div class="market-controls">
+                        <button class="refresh-btn" id="refresh-market">🔄 Refresh</button>
+                        <div class="last-updated">
+                            Updated: <span id="market-timestamp">--:--:--</span>
                         </div>
                     </div>
                 </div>
+                <div class="market-grid" id="market-indices">
+                    <!-- Live market cards will be populated here -->
+                </div>
             </div>
-            
-            <!-- Enhanced Quick Commands -->
-            <div class="quick-commands">
-                <h4>💬 Try These Questions</h4>
-                <div class="command-buttons">
-                    <button class="btn btn--sm command-btn" data-command="what do you see">What do you see?</button>
-                    <button class="btn btn--sm command-btn" data-command="how can you help me">How can you help me?</button>
-                    <button class="btn btn--sm command-btn" data-command="tell me about yourself">Tell me about yourself</button>
-                    <button class="btn btn--sm command-btn" data-command="what should I be concerned about">What should I be concerned about?</button>
+
+            <!-- AI Insights -->
+            <div class="insights-section">
+                <h3 class="section-title">AI Market Insights</h3>
+                <div class="insights-grid">
+                    <div class="insight-card trend-analysis">
+                        <div class="insight-icon">📈</div>
+                        <h4>Market Sentiment</h4>
+                        <div class="sentiment-value" id="market-sentiment">Analyzing...</div>
+                        <p class="insight-description">Real-time sentiment analysis from news and social media</p>
+                    </div>
+                    <div class="insight-card volatility-index">
+                        <div class="insight-icon">⚡</div>
+                        <h4>Volatility Index</h4>
+                        <div class="volatility-value" id="volatility-index">--</div>
+                        <p class="insight-description">Current market volatility assessment</p>
+                    </div>
+                    <div class="insight-card opportunity-score">
+                        <div class="insight-icon">🎯</div>
+                        <h4>Opportunity Score</h4>
+                        <div class="opportunity-value" id="opportunity-score">--/100</div>
+                        <p class="insight-description">AI-calculated investment opportunities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Movers -->
+            <div class="movers-section">
+                <h3 class="section-title">Live Market Movers</h3>
+                <div class="movers-tabs">
+                    <button class="mover-tab active" data-tab="gainers">Top Gainers</button>
+                    <button class="mover-tab" data-tab="losers">Top Losers</button>
+                    <button class="mover-tab" data-tab="volume">High Volume</button>
+                </div>
+                <div class="movers-content" id="movers-content">
+                    <!-- Live movers data will be populated here -->
                 </div>
             </div>
         </section>
 
-        <!-- Center Column - Live Camera & Object Detection -->
-        <section class="panel camera-panel">
-            <div class="panel-header">
-                <h2>👁️ AI Vision System</h2>
-                <div class="camera-controls">
-                    <button class="btn btn--sm" id="startCamera">Start Camera</button>
-                    <button class="btn btn--sm" id="stopCamera">Stop Camera</button>
-                    <select class="form-control" id="cameraSelect" style="width: auto;">
-                        <option value="">Select Camera</option>
-                    </select>
-                </div>
+        <!-- Enhanced User Profile Section -->
+        <section id="profile" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Complete Investment Profile</h2>
+                <p class="section-subtitle">Advanced psychometric assessment for personalized investment recommendations</p>
             </div>
             
-            <div class="camera-container">
-                <video id="cameraVideo" autoplay playsinline muted></video>
-                <canvas id="detectionCanvas"></canvas>
-                <div class="camera-overlay">
-                    <div class="overlay-stats">
-                        <div class="stat-item">FPS: <span id="fpsCounter">0</span></div>
-                        <div class="stat-item">Objects: <span id="objectCount">0</span></div>
-                        <div class="stat-item">Mode: <span id="modeIndicator">POLICING</span></div>
-                        <div class="stat-item ai-status-overlay">AI: READY</div>
-                    </div>
-                    <div class="confidence-control">
-                        <label>Confidence:</label>
-                        <input type="range" min="0.1" max="1" step="0.1" value="0.3" id="confidenceSlider">
-                        <span id="confidenceValue">0.3</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- AI-Enhanced Vision Analysis Results -->
-            <div class="vision-analysis">
-                <div class="analysis-tabs">
-                    <button class="tab-btn active" data-tab="objects">🔍 Objects</button>
-                    <button class="tab-btn" data-tab="threats">⚠️ Threats</button>
-                    <button class="tab-btn" data-tab="medical">⚕️ Medical</button>
-                </div>
-                
-                <div class="tab-content" id="objectsTab">
-                    <div class="detection-summary">
-                        <div class="summary-stats">
-                            <div class="stat">Total: <span id="totalObjects">0</span></div>
-                            <div class="stat">People: <span id="peopleCount">0</span></div>
-                            <div class="stat">Items: <span id="itemsCount">0</span></div>
-                        </div>
-                        <div class="object-list" id="objectList">
-                            <div class="no-detections">Start camera to begin AI-powered object detection...</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tab-content hidden" id="threatsTab">
-                    <div class="threat-analysis">
-                        <div class="threat-level" id="threatLevel">THREAT LEVEL: LOW</div>
-                        <div class="threat-details" id="threatDetails">
-                            <div class="threat-item">
-                                <span class="threat-label">AI Assessment:</span>
-                                <span class="threat-status safe">Environment appears safe</span>
+            <div class="profile-container">
+                <!-- Personal Information -->
+                <div class="profile-card personal-info">
+                    <h3 class="card-title">Personal Information</h3>
+                    <form id="personal-form" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="full-name" class="form-input" placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Age</label>
+                                <input type="number" id="age" class="form-input" min="18" max="100" placeholder="25">
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Marital Status</label>
+                                <select id="marital-status" class="form-select">
+                                    <option value="">Select Status</option>
+                                    <option value="single">Single</option>
+                                    <option value="married">Married</option>
+                                    <option value="divorced">Divorced</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dependents</label>
+                                <input type="number" id="dependents" class="form-input" min="0" max="10" placeholder="0">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Financial Information -->
+                <div class="profile-card financial-info">
+                    <h3 class="card-title">Financial Details</h3>
+                    <form id="financial-form" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Annual Income (₹)</label>
+                                <input type="number" id="annual-income" class="form-input" placeholder="1000000">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Monthly Expenses (₹)</label>
+                                <input type="number" id="monthly-expenses" class="form-input" placeholder="50000">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Current Assets Value (₹)</label>
+                                <input type="number" id="current-assets" class="form-input" placeholder="500000">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Outstanding Loans (₹)</label>
+                                <input type="number" id="outstanding-loans" class="form-input" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Investment Amount (₹)</label>
+                            <input type="number" id="investment-amount" class="form-input" placeholder="100000">
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Psychometric Assessment -->
+                <div class="profile-card psychometric-assessment">
+                    <h3 class="card-title">Psychometric Assessment</h3>
+                    <div class="assessment-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="assessment-progress"></div>
+                        </div>
+                        <span class="progress-text">0% Complete</span>
+                    </div>
+
+                    <div class="question-container" id="question-container">
+                        <!-- Questions will be dynamically loaded -->
+                    </div>
+
+                    <div class="assessment-controls">
+                        <button class="btn-secondary" id="prev-question" disabled>Previous</button>
+                        <button class="btn-primary" id="next-question">Next Question</button>
                     </div>
                 </div>
-                
-                <div class="tab-content hidden" id="medicalTab">
-                    <div class="medical-analysis">
-                        <div class="medical-status">AI medical scanning active...</div>
-                        <div class="medical-items" id="medicalItems">
-                            <div class="medical-item">No medical equipment detected by AI</div>
+
+                <!-- Risk Profile Results -->
+                <div class="profile-card risk-results" id="risk-results" style="display: none;">
+                    <h3 class="card-title">Your Investment DNA</h3>
+                    <div class="risk-score-display">
+                        <div class="risk-score" id="final-risk-score">85</div>
+                        <div class="risk-level" id="risk-level">Aggressive Growth</div>
+                    </div>
+                    <div class="personality-traits" id="personality-traits">
+                        <!-- Personality analysis will be displayed here -->
+                    </div>
+                    <button class="btn-gradient" id="generate-recommendations">Generate AI Recommendations</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stock Explorer Section -->
+        <section id="explorer" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Advanced Stock Explorer</h2>
+                <p class="section-subtitle">Search and analyze any stock with real-time data and AI insights</p>
+            </div>
+
+            <div class="explorer-container">
+                <!-- Search Interface -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="stock-search" class="search-input" placeholder="Search stocks, indices, F&O contracts...">
+                        <button class="search-btn" id="search-btn">🔍</button>
+                    </div>
+                    <div class="search-filters">
+                        <button class="filter-chip active" data-filter="all">All</button>
+                        <button class="filter-chip" data-filter="stocks">Stocks</button>
+                        <button class="filter-chip" data-filter="indices">Indices</button>
+                        <button class="filter-chip" data-filter="futures">Futures</button>
+                        <button class="filter-chip" data-filter="options">Options</button>
+                        <button class="filter-chip" data-filter="ipo">IPOs</button>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div class="search-results" id="search-results">
+                    <!-- Search results will be populated here -->
+                </div>
+
+                <!-- Stock Detail Modal -->
+                <div class="stock-modal" id="stock-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="modal-stock-title">Stock Details</h3>
+                            <button class="modal-close" id="modal-close">×</button>
+                        </div>
+                        <div class="modal-body" id="modal-body">
+                            <!-- Stock details will be loaded here -->
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Right Column - AI Performance & Analytics -->
-        <section class="panel analytics-panel">
-            <div class="panel-header">
-                <h2>📊 AI Analytics</h2>
-                <div class="uptime">Uptime: <span id="uptime">00:00:00</span></div>
+        <!-- Analysis Section -->
+        <section id="analysis" class="section">
+            <div class="section-header">
+                <h2 class="section-title">AI Market Analysis</h2>
+                <p class="section-subtitle">Deep learning insights powered by Gemini AI</p>
             </div>
-            
-            <!-- AI Performance Chart -->
-            <div class="performance-section">
-                <h4>🧠 AI Performance</h4>
-                <div class="chart-container" style="position: relative; height: 150px;">
-                    <canvas id="performanceChart"></canvas>
-                </div>
-                <div class="performance-stats">
-                    <div class="perf-stat">
-                        <span class="stat-label">AI Processing:</span>
-                        <span class="stat-value" id="processingTime">0ms</span>
+
+            <div class="analysis-container">
+                <div class="analysis-grid">
+                    <!-- Chart Section -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Live Price Chart</h3>
+                            <div class="chart-controls">
+                                <select id="chart-timeframe" class="chart-select">
+                                    <option value="1">1 Min</option>
+                                    <option value="5">5 Min</option>
+                                    <option value="15">15 Min</option>
+                                    <option value="60" selected>1 Hour</option>
+                                    <option value="1D">1 Day</option>
+                                    <option value="1W">1 Week</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="price-chart" class="price-chart"></div>
                     </div>
-                    <div class="perf-stat">
-                        <span class="stat-label">Detection Rate:</span>
-                        <span class="stat-value" id="detectionRate">0/sec</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- AI Mission Analytics -->
-            <div class="mission-analytics">
-                <h4>🎯 Mission Progress</h4>
-                <div class="analytics-grid">
-                    <div class="analytic-item">
-                        <div class="analytic-label">AI Scans</div>
-                        <div class="analytic-value" id="scansCompleted">0</div>
-                    </div>
-                    <div class="analytic-item">
-                        <div class="analytic-label">Commands Processed</div>
-                        <div class="analytic-value" id="commandsProcessed">0</div>
-                    </div>
-                    <div class="analytic-item">
-                        <div class="analytic-label">AI Response Time</div>
-                        <div class="analytic-value" id="avgResponseTime">--ms</div>
-                    </div>
-                    <div class="analytic-item">
-                        <div class="analytic-label">AI Accuracy</div>
-                        <div class="analytic-value" id="systemAccuracy">95%</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Recent AI Activity -->
-            <div class="recent-activity">
-                <h4>🔄 Recent AI Activity</h4>
-                <div class="activity-log" id="activityLog">
-                    <div class="activity-item">
-                        <div class="activity-icon">🔄</div>
-                        <div class="activity-content">
-                            <div class="activity-text">AI systems initialized successfully</div>
-                            <div class="activity-time">System startup</div>
+
+                    <!-- Technical Analysis -->
+                    <div class="technical-analysis">
+                        <h3>Technical Indicators</h3>
+                        <div class="indicators-grid" id="technical-indicators">
+                            <!-- Technical indicators will be populated here -->
                         </div>
                     </div>
+
+                    <!-- AI Analysis -->
+                    <div class="ai-analysis">
+                        <h3>Gemini AI Analysis</h3>
+                        <div class="ai-analysis-content" id="ai-analysis-content">
+                            <div class="analysis-loading">
+                                <div class="spinner"></div>
+                                <p>AI is analyzing market data...</p>
+                            </div>
+                        </div>
+                        <button class="btn-gradient" id="generate-analysis">Get Fresh AI Analysis</button>
+                    </div>
                 </div>
             </div>
-            
-            <!-- AI System Health -->
-            <div class="system-health">
-                <h4>💚 AI System Health</h4>
-                <div class="health-indicators">
-                    <div class="health-item">
-                        <span class="health-label">Camera:</span>
-                        <span class="health-status" id="cameraHealth">Offline</span>
+        </section>
+
+        <!-- Portfolio Section -->
+        <section id="portfolio" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Smart Portfolio Management</h2>
+                <p class="section-subtitle">AI-optimized portfolio with real-time tracking</p>
+            </div>
+
+            <div class="portfolio-container">
+                <!-- Portfolio Overview -->
+                <div class="portfolio-overview">
+                    <div class="portfolio-metrics">
+                        <div class="metric-card">
+                            <h4>Total Value</h4>
+                            <div class="metric-value" id="total-portfolio-value">₹0</div>
+                            <div class="metric-change" id="portfolio-change">+0%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Today's P&L</h4>
+                            <div class="metric-value" id="todays-pnl">₹0</div>
+                            <div class="metric-change" id="pnl-percentage">+0%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Total Return</h4>
+                            <div class="metric-value" id="total-return">₹0</div>
+                            <div class="metric-change" id="return-percentage">+0%</div>
+                        </div>
                     </div>
-                    <div class="health-item">
-                        <span class="health-label">AI Models:</span>
-                        <span class="health-status" id="modelsHealth">Loading</span>
+                    
+                    <div class="portfolio-chart-container">
+                        <canvas id="portfolio-allocation-chart"></canvas>
                     </div>
-                    <div class="health-item">
-                        <span class="health-label">Voice AI:</span>
-                        <span class="health-status" id="voiceHealth">Ready</span>
+                </div>
+
+                <!-- Holdings -->
+                <div class="holdings-section">
+                    <h3>Current Holdings</h3>
+                    <div class="holdings-list" id="holdings-list">
+                        <!-- Holdings will be populated here -->
                     </div>
-                    <div class="health-item">
-                        <span class="health-label">Detection:</span>
-                        <span class="health-status" id="detectionHealth">Standby</span>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="recommendations-section">
+                    <h3>AI Portfolio Recommendations</h3>
+                    <div class="recommendations-list" id="portfolio-recommendations">
+                        <!-- Recommendations will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Trading Section -->
+        <section id="trading" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Live Trading Terminal</h2>
+                <p class="section-subtitle">Execute trades with AI-powered recommendations</p>
+            </div>
+
+            <div class="trading-container">
+                <!-- Order Form -->
+                <div class="order-form-container">
+                    <div class="order-form">
+                        <div class="form-tabs">
+                            <button class="tab-btn active" data-tab="buy">Buy</button>
+                            <button class="tab-btn" data-tab="sell">Sell</button>
+                        </div>
+
+                        <div class="order-inputs">
+                            <div class="form-group">
+                                <label class="form-label">Symbol</label>
+                                <input type="text" id="order-symbol" class="form-input" placeholder="Enter stock symbol">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" id="order-quantity" class="form-input" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Order Type</label>
+                                <select id="order-type" class="form-select">
+                                    <option value="MARKET">Market</option>
+                                    <option value="LIMIT">Limit</option>
+                                    <option value="SL">Stop Loss</option>
+                                    <option value="SL_M">Stop Loss Market</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="price-group">
+                                <label class="form-label">Price (₹)</label>
+                                <input type="number" id="order-price" class="form-input" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Product</label>
+                                <select id="order-product" class="form-select">
+                                    <option value="CNC">Delivery (CNC)</option>
+                                    <option value="MIS">Intraday (MIS)</option>
+                                    <option value="NRML">Normal (NRML)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Estimated Cost:</span>
+                                <span id="estimated-cost">₹0</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Available Balance:</span>
+                                <span id="available-balance">₹0</span>
+                            </div>
+                        </div>
+
+                        <button class="place-order-btn" id="place-order-btn">Place Order</button>
+                    </div>
+
+                    <!-- AI Trading Assistant -->
+                    <div class="ai-assistant">
+                        <h4>AI Trading Assistant</h4>
+                        <div class="ai-suggestion" id="ai-trading-suggestion">
+                            <div class="suggestion-loading">Analyzing market for optimal entry...</div>
+                        </div>
+                        <button class="btn-secondary" id="get-ai-suggestion">Get AI Suggestion</button>
+                    </div>
+                </div>
+
+                <!-- Order Book -->
+                <div class="order-book-container">
+                    <h3>Order Book</h3>
+                    <div class="order-book" id="order-book">
+                        <!-- Order book will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Positions & Orders -->
+                <div class="positions-container">
+                    <div class="positions-tabs">
+                        <button class="tab-btn active" data-tab="positions">Positions</button>
+                        <button class="tab-btn" data-tab="orders">Orders</button>
+                    </div>
+                    <div class="positions-content" id="positions-content">
+                        <!-- Positions and orders will be populated here -->
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Bottom Status Bar -->
-    <footer class="status-bar">
-        <div class="status-section">
-            <div class="status-item">
-                <span class="status-dot" id="overallStatus"></span>
-                Guardian X AI: <span id="overallStatusText">Initializing</span>
+    <!-- Enhanced AI Chatbot -->
+    <div id="chatbot-container" class="chatbot-container">
+        <button id="chatbot-toggle" class="chatbot-toggle">
+            <span class="chat-icon">🤖</span>
+            <div class="notification-badge" id="chat-notification" style="display: none;">1</div>
+        </button>
+        <div id="chatbot-window" class="chatbot-window">
+            <div class="chatbot-header">
+                <div class="chat-header-info">
+                    <h4>Kunal AI Advisor</h4>
+                    <span class="chat-status">Powered by Gemini AI</span>
+                </div>
+                <div class="chat-header-actions">
+                    <button class="chat-action-btn" id="clear-chat" title="Clear Chat">🗑️</button>
+                    <button class="chat-action-btn" id="chatbot-close">×</button>
+                </div>
             </div>
-            <div class="status-item">
-                Objects Tracked: <span id="objectsTracked">0</span>
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="message ai-message">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <p>Hello! I'm your AI investment advisor powered by Google Gemini. I can help you with:</p>
+                        <ul>
+                            <li>Stock analysis and recommendations</li>
+                            <li>Portfolio optimization</li>
+                            <li>Market insights and trends</li>
+                            <li>Risk assessment</li>
+                            <li>Trading strategies</li>
+                        </ul>
+                        <p>What would you like to know about the markets today?</p>
+                    </div>
+                </div>
             </div>
-            <div class="status-item">
-                Voice AI: <span id="voiceStatusText">Inactive</span>
+            <div class="quick-actions">
+                <button class="quick-action" data-query="What are the top gainers today?">Top Gainers</button>
+                <button class="quick-action" data-query="Analyze my portfolio risk">Portfolio Risk</button>
+                <button class="quick-action" data-query="Should I buy or sell RELIANCE?">Stock Advice</button>
+            </div>
+            <div class="chatbot-input-container">
+                <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask anything about investments...">
+                <button id="chatbot-send" class="chatbot-send">
+                    <span class="send-icon">📤</span>
+                </button>
             </div>
         </div>
-        <div class="status-ticker">
-            <span class="ticker-text" id="statusTicker">🤖 Guardian X AI Assistant initializing • 🧠 Natural language processing loading • 🎤 Voice response ready • 📹 Vision-integrated AI preparing</span>
-        </div>
-    </footer>
+    </div>
 
-    <script src="app.js"></script>
+    <!-- Notification System -->
+    <div id="notification-container" class="notification-container">
+        <!-- Notifications will be dynamically added here -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="enhanced-app.js"></script>
 </body>
 </html>
